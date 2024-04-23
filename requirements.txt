@@ -1,0 +1,5 @@
+torch
+torchvision
+torchaudio
+tensorflow-cpu
+opencv-python
