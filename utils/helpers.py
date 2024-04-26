@@ -195,8 +195,7 @@ def extract_and_deskew_textlines(img, textline_mask):
     """
     Extracts and deskews textlines from an image based on the provided textline mask. It calculates
     the minimum area rectangle for contours, performs perspective transformations to deskew the text,
-    and handles potential rotations to ensure text lines are horizontal. It returns the de-skewed 
-    textlines plus all information to re-skew them if needed.
+    and handles potential rotations to ensure text lines are horizontal. 
 
     Args:
     img (cv2.Image): The original image from which to extract textlines.
@@ -231,6 +230,7 @@ def extract_and_deskew_textlines(img, textline_mask):
         textline_images = []
         for rect in rectangles:
             width, height = rect[1]
+            rotation_angle = rect[2] # unclear how to interpret and use rotation angle!!!
             
             # Convert dimensions to integer and ensure they are > 0
             width = int(width)
@@ -253,8 +253,9 @@ def extract_and_deskew_textlines(img, textline_mask):
                     temp = height
                     height = width
                     width = temp
+                    rotation_angle = 90-rotation_angle
                 center = rect[0]
-                textline_images.append((warped, center, height, width))
+                textline_images.append((warped, center, height, width, rotation_angle))
             except cv2.error as e:
                 print(f"Error with warpPerspective: {e}")
 
