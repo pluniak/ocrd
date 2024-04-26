@@ -156,102 +156,108 @@ def do_prediction(model, img):
     return prediction_true
             
 
-def do_line_segmentation(model_name, img):
+def extract_textlines(img, textline_mask):
+    """
+    Extracts textline segments from the image using a mask, with filters to remove unlikely text boxes.
 
-    img_org = np.copy(img)
-    #model = from_pretrained_keras(model_name)
+    Args:
+    img: cv2.Image - Original image from which textlines are to be extracted.
+    textline_mask: array-like - Binary image with textline segments labeled.
 
-    # bitmap output
-    img_height_model=model.layers[len(model.layers)-1].output_shape[1]
-    img_width_model=model.layers[len(model.layers)-1].output_shape[2]
-    #n_classes=model.layers[len(model.layers)-1].output_shape[3]
+    Returns:
+    textline_images: List of tuples, each containing an image of an extracted textline and its position.
+    """
+    num_labels, labels_im = cv2.connectedComponents(textline_mask)
+    bounding_boxes = []
 
-    #img_org = np.copy(img)
-    #img_height_h = img_org.shape[0]
-    #img_width_h = img_org.shape[1]
+    for label in range(1, num_labels):
+        mask = np.where(labels_im == label, 255, 0).astype('uint8')
+        x, y, w, h = cv2.boundingRect(mask)
+        bounding_boxes.append((x, y, w, h))
 
-    num_col_classifier = 1 # return_num_columns(img)
-    width_early = img.shape[1]
+    # Calculate median width and height
+    if bounding_boxes:
+        median_width = np.median([w for _, _, w, _ in bounding_boxes])
+        median_height = np.median([h for _, _, _, h in bounding_boxes])
 
-    img = return_scaled_image(img, num_col_classifier, width_early, model_name)
+        # Filter boxes that are too small or improperly shaped
+        textline_images = []
+        for x, y, w, h in bounding_boxes:
+            if w > 0.5 * median_width and h > 0.5 * median_height and w > h:
+                cropped_image = img[y:y+h, x:x+w]
+                textline_images.append((cropped_image, x, y, w, h))
 
-    if img.shape[0] < img_height_model:
-        img = resize_image(img, img_height_model, img.shape[1])
+    return textline_images
 
-    if img.shape[1] < img_width_model:
-        img = resize_image(img, img.shape[0], img_width_model)
 
-    marginal_of_patch_percent = 0.1
-    margin = int(marginal_of_patch_percent * img_height_model)
-    width_mid = img_width_model - 2 * margin
-    height_mid = img_height_model - 2 * margin
-    img = img / float(255.0)
-    img = img.astype(np.float16)
-    img_h = img.shape[0]
-    img_w = img.shape[1]
-    prediction_true = np.zeros((img_h, img_w, 3))
-    #mask_true = np.zeros((img_h, img_w))
-    nxf = img_w / float(width_mid)
-    nyf = img_h / float(height_mid)
-    nxf = int(nxf) + 1 if nxf > int(nxf) else int(nxf)
-    nyf = int(nyf) + 1 if nyf > int(nyf) else int(nyf)
+def extract_and_deskew_textlines(img, textline_mask):
 
-    for i in range(nxf):
-        for j in range(nyf):
-            if i == 0:
-                index_x_d = i * width_mid
-                index_x_u = index_x_d + img_width_model
-            else:
-                index_x_d = i * width_mid
-                index_x_u = index_x_d + img_width_model
-            if j == 0:
-                index_y_d = j * height_mid
-                index_y_u = index_y_d + img_height_model
-            else:
-                index_y_d = j * height_mid
-                index_y_u = index_y_d + img_height_model
-            if index_x_u > img_w:
-                index_x_u = img_w
-                index_x_d = img_w - img_width_model
-            if index_y_u > img_h:
-                index_y_u = img_h
-                index_y_d = img_h - img_height_model
+    """
+    Extracts and deskews textlines from an image based on the provided textline mask. It calculates
+    the minimum area rectangle for contours, performs perspective transformations to deskew the text,
+    and handles potential rotations to ensure text lines are horizontal. It returns the de-skewed 
+    textlines plus all information to re-skew them if needed.
 
-            img_patch = img[index_y_d:index_y_u, index_x_d:index_x_u, :]
+    Args:
+    img (cv2.Image): The original image from which to extract textlines.
+    textline_mask (np.array): A binary mask where textlines have been segmented.
 
-            label_p_pred = model.predict(img_patch.reshape(1, img_patch.shape[0], img_patch.shape[1], img_patch.shape[2]),
-                                            verbose=0)
-                
-            seg = np.argmax(label_p_pred, axis=3)[0]
-            seg_color = np.repeat(seg[:, :, np.newaxis], 3, axis=2)
+    Returns:
+    list: A list of tuples for each textline, containing:
+          - de-skewed image (np.array) as well as center, height and width of the original bounding box (tuple)
+    """
+    
+    num_labels, labels_im = cv2.connectedComponents(textline_mask)
+    rectangles = []
 
-            if i == 0 and j == 0:
-                seg_color = seg_color[0 : seg_color.shape[0] - margin, 0 : seg_color.shape[1] - margin, :]
-                prediction_true[index_y_d + 0 : index_y_u - margin, index_x_d + 0 : index_x_u - margin, :] = seg_color
-            elif i == nxf - 1 and j == nyf - 1:
-                seg_color = seg_color[margin : seg_color.shape[0] - 0, margin : seg_color.shape[1] - 0, :]
-                prediction_true[index_y_d + margin : index_y_u - 0, index_x_d + margin : index_x_u - 0, :] = seg_color
-            elif i == 0 and j == nyf - 1:
-                seg_color = seg_color[margin : seg_color.shape[0] - 0, 0 : seg_color.shape[1] - margin, :]
-                prediction_true[index_y_d + margin : index_y_u - 0, index_x_d + 0 : index_x_u - margin, :] = seg_color
-            elif i == nxf - 1 and j == 0:
-                seg_color = seg_color[0 : seg_color.shape[0] - margin, margin : seg_color.shape[1] - 0, :]
-                prediction_true[index_y_d + 0 : index_y_u - margin, index_x_d + margin : index_x_u - 0, :] = seg_color
-            elif i == 0 and j != 0 and j != nyf - 1:
-                seg_color = seg_color[margin : seg_color.shape[0] - margin, 0 : seg_color.shape[1] - margin, :]
-                prediction_true[index_y_d + margin : index_y_u - margin, index_x_d + 0 : index_x_u - margin, :] = seg_color
-            elif i == nxf - 1 and j != 0 and j != nyf - 1:
-                seg_color = seg_color[margin : seg_color.shape[0] - margin, margin : seg_color.shape[1] - 0, :]
-                prediction_true[index_y_d + margin : index_y_u - margin, index_x_d + margin : index_x_u - 0, :] = seg_color
-            elif i != 0 and i != nxf - 1 and j == 0:
-                seg_color = seg_color[0 : seg_color.shape[0] - margin, margin : seg_color.shape[1] - margin, :]
-                prediction_true[index_y_d + 0 : index_y_u - margin, index_x_d + margin : index_x_u - margin, :] = seg_color
-            elif i != 0 and i != nxf - 1 and j == nyf - 1:
-                seg_color = seg_color[margin : seg_color.shape[0] - 0, margin : seg_color.shape[1] - margin, :]
-                prediction_true[index_y_d + margin : index_y_u - 0, index_x_d + margin : index_x_u - margin, :] = seg_color
-            else:
-                seg_color = seg_color[margin : seg_color.shape[0] - margin, margin : seg_color.shape[1] - margin, :]
-                prediction_true[index_y_d + margin : index_y_u - margin, index_x_d + margin : index_x_u - margin, :] = seg_color
+    # First, gather all minAreaRectangles and corresponding contours
+    contours_all = []
+    for label in range(1, num_labels):
+        mask = np.where(labels_im == label, 255, 0).astype('uint8')
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if contours:
+            contours_all.append(contours)
+    
+    # filter too small contours that cannot be valid text segmentations
+    median = np.median([contours[0].sum() for contours in contours_all])
+    for contours in contours_all:
+        if contours[0].sum() > median*.5:
+            rect = cv2.minAreaRect(contours[0])
+            rectangles.append(rect)
 
-    prediction_true = prediction_true.astype(np.uint8)
-    return prediction_true
+    # Calculate median dimensions
+    if rectangles:
+        # Filter rectangles and de-skew images
+        textline_images = []
+        for rect in rectangles:
+            width, height = rect[1]
+            
+            # Convert dimensions to integer and ensure they are > 0
+            width = int(width)
+            height = int(height)
+
+            box = cv2.boxPoints(rect)
+            box = np.intp(box)
+            src_pts = box.astype("float32")
+            dst_pts = np.array([[0, height-1],
+                                [0, 0],
+                                [width-1, 0],
+                                [width-1, height-1]], dtype="float32")
+            
+            try:
+                M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+                warped = cv2.warpPerspective(img, M, (width, height))
+                # Check and rotate if the text line is taller than wide
+                if height > width:
+                    warped = cv2.rotate(warped, cv2.ROTATE_90_CLOCKWISE)
+                    temp = height
+                    height = width
+                    width = temp
+                center = rect[0]
+                textline_images.append((warped, center, height, width))
+            except cv2.error as e:
+                print(f"Error with warpPerspective: {e}")
+
+    return textline_images
+
+
