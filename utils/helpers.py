@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import json
 
 
 def resize_image(img_in,input_height,input_width):
@@ -156,41 +157,41 @@ def do_prediction(model, img):
     return prediction_true
             
 
-def extract_textlines(img, textline_mask):
-    """
-    Extracts textline segments from the image using a mask, with filters to remove unlikely text boxes.
+# def extract_textlines(img, textline_mask):
+#     """
+#     Extracts textline segments from the image using a mask, with filters to remove unlikely text boxes.
 
-    Args:
-    img: cv2.Image - Original image from which textlines are to be extracted.
-    textline_mask: array-like - Binary image with textline segments labeled.
+#     Args:
+#     img: cv2.Image - Original image from which textlines are to be extracted.
+#     textline_mask: array-like - Binary image with textline segments labeled.
 
-    Returns:
-    textline_images: List of tuples, each containing an image of an extracted textline and its position.
-    """
-    num_labels, labels_im = cv2.connectedComponents(textline_mask)
-    bounding_boxes = []
+#     Returns:
+#     textline_images: List of tuples, each containing an image of an extracted textline and its position.
+#     """
+#     num_labels, labels_im = cv2.connectedComponents(textline_mask)
+#     bounding_boxes = []
 
-    for label in range(1, num_labels):
-        mask = np.where(labels_im == label, 255, 0).astype('uint8')
-        x, y, w, h = cv2.boundingRect(mask)
-        bounding_boxes.append((x, y, w, h))
+#     for label in range(1, num_labels):
+#         mask = np.where(labels_im == label, 255, 0).astype('uint8')
+#         x, y, w, h = cv2.boundingRect(mask)
+#         bounding_boxes.append((x, y, w, h))
 
-    # Calculate median width and height
-    if bounding_boxes:
-        median_width = np.median([w for _, _, w, _ in bounding_boxes])
-        median_height = np.median([h for _, _, _, h in bounding_boxes])
+#     # Calculate median width and height
+#     if bounding_boxes:
+#         median_width = np.median([w for _, _, w, _ in bounding_boxes])
+#         median_height = np.median([h for _, _, _, h in bounding_boxes])
 
-        # Filter boxes that are too small or improperly shaped
-        textline_images = []
-        for x, y, w, h in bounding_boxes:
-            if w > 0.5 * median_width and h > 0.5 * median_height and w > h:
-                cropped_image = img[y:y+h, x:x+w]
-                textline_images.append((cropped_image, x, y, w, h))
+#         # Filter boxes that are too small or improperly shaped
+#         textline_images = []
+#         for x, y, w, h in bounding_boxes:
+#             if w > 0.5 * median_width and h > 0.5 * median_height and w > h:
+#                 cropped_image = img[y:y+h, x:x+w]
+#                 textline_images.append((cropped_image, x, y, w, h))
 
-    return textline_images
+#     return textline_images
 
 
-def extract_and_deskew_textlines(img, textline_mask):
+def extract_and_deskew_textlines(img, textline_mask, size_filter=True):
 
     """
     Extracts and deskews textlines from an image based on the provided textline mask. It calculates
@@ -198,8 +199,9 @@ def extract_and_deskew_textlines(img, textline_mask):
     and handles potential rotations to ensure text lines are horizontal. 
 
     Args:
-    img (cv2.Image): The original image from which to extract textlines.
-    textline_mask (np.array): A binary mask where textlines have been segmented.
+    img (3D np.array): The original image from which to extract textlines.
+    textline_mask (2D np.array): A binary mask where textlines have been segmented.
+    filter
 
     Returns:
     list: A list of tuples for each textline, containing:
@@ -207,24 +209,32 @@ def extract_and_deskew_textlines(img, textline_mask):
     """
     
     num_labels, labels_im = cv2.connectedComponents(textline_mask)
-    rectangles = []
 
-    # First, gather all minAreaRectangles and corresponding contours
-    contours_all = []
+    # Thresholds for filtering
+    MIN_PIXEL_SUM = 30 # absolute filtering
+    MEDIAN_LOWER_BOUND = .5 # relative filtering
+    MEDIAN_HIGHER_BOUND = 5 # relative filtering
+
+    # Gather masks and their sizes
+    cc_sizes = []
+    masks = []
     for label in range(1, num_labels):
-        mask = np.where(labels_im == label, 255, 0).astype('uint8')
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        if contours:
-            contours_all.append(contours)
-    
-    # filter too small contours that cannot be valid text segmentations
-    median = np.median([contours[0].sum() for contours in contours_all])
-    for contours in contours_all:
-        if contours[0].sum() > median*.5:
+        mask = np.where(labels_im == label, 1, 0)
+        if mask.sum() > MIN_PIXEL_SUM: # dismiss mini segmentations to avoid skewing of median
+            cc_sizes.append(mask.sum())
+            masks.append(mask)
+
+    # filter masks by size in relation to median; then calculate contours and min area bounding box for remaining ones
+    rectangles = []
+    median = np.median(cc_sizes)
+    for mask in masks:
+        if mask.sum() > median*MEDIAN_LOWER_BOUND and mask.sum() < median*MEDIAN_HIGHER_BOUND:
+            mask = (mask*255).astype(np.uint8)
+            contours, _ = cv2.findContours(mask.astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             rect = cv2.minAreaRect(contours[0])
             rectangles.append(rect)
 
-    # Calculate median dimensions
+    # Transform (rotated) bounding boxes to horizontal; store together with rotation angle for downstream process re-transform
     if rectangles:
         # Filter rectangles and de-skew images
         textline_images = []
@@ -236,6 +246,7 @@ def extract_and_deskew_textlines(img, textline_mask):
             width = int(width)
             height = int(height)
 
+            # get source and destination points for image transform
             box = cv2.boxPoints(rect)
             box = np.intp(box)
             src_pts = box.astype("float32")
@@ -255,10 +266,22 @@ def extract_and_deskew_textlines(img, textline_mask):
                     width = temp
                     rotation_angle = 90-rotation_angle
                 center = rect[0]
-                textline_images.append((warped, center, height, width, rotation_angle))
+                left = center[0] - width//2
+                textline_images.append((warped, center, left, height, width, rotation_angle))
             except cv2.error as e:
                 print(f"Error with warpPerspective: {e}")
 
-    return textline_images
+        # cast to dict
+        keys = ['array', 'center', 'left', 'height', 'width', 'rotation_angle']
+        textline_images = {key: [tup[i] for tup in textline_images] for i, key in enumerate(keys)}
+
+    return textline_images #, cc_sizes
 
 
+def write_dict_to_json(dictionary, save_path, indent=4):
+    with open(save_path, "w") as outfile:  
+        json.dump(dictionary, outfile, indent=indent) 
+
+def load_json_to_dict(load_path):
+    with open(load_path) as json_file:
+        return json.load(json_file)
