@@ -1,10 +1,21 @@
 import cv2
 import numpy as np
 import json
+from PIL import Image, ImageDraw, ImageFont
+from transformers import pipeline
+from huggingface_hub import from_pretrained_keras
 
 
 def resize_image(img_in,input_height,input_width):
     return cv2.resize( img_in, ( input_width,input_height) ,interpolation=cv2.INTER_NEAREST)
+
+def write_dict_to_json(dictionary, save_path, indent=4):
+    with open(save_path, "w") as outfile:  
+        json.dump(dictionary, outfile, indent=indent) 
+
+def load_json_to_dict(load_path):
+    with open(load_path) as json_file:
+        return json.load(json_file)
 
 
 def return_scaled_image(img, num_col, width_early):
@@ -57,6 +68,70 @@ def visualize_model_output(prediction, img, model_name):
     added_image = cv2.addWeighted(img,0.5,output,0.1,0)
         
     return added_image
+
+
+def binarize_image(img, binarize_mode):
+    """
+    Binarizes an image according to the specified mode.
+
+    Parameters:
+    - img (ndarray): The input image to be binarized.
+    - binarize_mode (str): The mode of binarization. Can be 'detailed', 'fast', or 'no'.
+      - 'detailed': Uses a pre-trained deep learning model for binarization.
+      - 'fast': Uses OpenCV for a quicker, threshold-based binarization.
+      - 'no': Returns a copy of the original image.
+
+    Returns:
+    - ndarray: The binarized image.
+
+    Raises:
+    - ValueError: If an invalid binarize_mode is provided.
+
+    Description:
+    Depending on the 'binarize_mode', the function processes the image differently:
+    - For 'detailed' mode, it loads a specific model and performs prediction to binarize the image.
+    - For 'fast' mode, it quickly converts the image to grayscale and applies a threshold.
+    - For 'no' mode, it simply returns the original image unchanged.
+    If an unsupported mode is provided, the function raises a ValueError.
+
+    Example usage:
+    ```python
+    img = cv2.imread('path_to_image.jpg')
+    binarized_img = binarize_image(img, 'fast')
+    plt.imshow(binarized_img)
+    ```
+
+    Note:
+    - The 'detailed' mode requires a pre-trained model from huggingface_hub.
+    - This function depends on OpenCV (cv2) for image processing in 'fast' mode.
+    """
+
+    if binarize_mode == 'detailed':
+        model_name = "SBB/eynollah-binarization"
+        model = from_pretrained_keras(model_name)
+        binarized = do_prediction(model, img)
+
+        # Convert from mask to image (letters black)
+        binarized = binarized.astype(np.int8)
+        binarized = -binarized + 1
+        binarized = (binarized * 255).astype(np.uint8)
+
+    elif binarize_mode == 'fast':
+        binarized = return_scaled_image(img, 1, img.shape[1])
+        binarized = cv2.cvtColor(binarized, cv2.COLOR_BGR2GRAY)
+        _, binarized = cv2.threshold(binarized, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+        binarized = np.repeat(binarized[:, :, np.newaxis], 3, axis=2)
+
+    elif binarize_mode == 'no':
+        binarized = img.copy()
+
+    else:
+        accepted_values = ['detailed', 'fast', 'no']
+        raise ValueError(f"Invalid value provided: {binarize_mode}. Accepted values are: {accepted_values}")
+
+    binarized = binarized.astype(np.uint8)
+
+    return binarized
 
 
 def do_prediction(model, img):
@@ -278,10 +353,129 @@ def extract_and_deskew_textlines(img, textline_mask, size_filter=True):
     return textline_images #, cc_sizes
 
 
-def write_dict_to_json(dictionary, save_path, indent=4):
-    with open(save_path, "w") as outfile:  
-        json.dump(dictionary, outfile, indent=indent) 
+def perform_ocr_on_textlines(textline_images):
+    """
+    Processes a list of image arrays using a pre-trained OCR model to extract text.
 
-def load_json_to_dict(load_path):
-    with open(load_path) as json_file:
-        return json.load(json_file)
+    Parameters:
+    - textline_images (dict): A dictionary with a key 'array' that contains a list of image arrays. 
+      Each image array represents a line of text that will be processed by the OCR model.
+
+    Returns:
+    - dict: A dictionary containing a list of extracted text under the key 'preds'.
+
+    Description:
+    The function initializes the OCR model 'microsoft/trocr-base-handwritten' using Hugging Face's 
+    `pipeline` API for image-to-text conversion. Each image in the input list is converted from an 
+    array format to a PIL Image, processed by the model, and the text prediction is collected.
+    The progress of image processing is printed every 10 images. The final result is a dictionary 
+    with the key 'preds' that holds all text predictions as a list.
+
+    Example usage:
+    ```python
+    textline_images = {'array': [array_of_image1, array_of_image2, ...]}
+    extracted_texts = perform_ocr_on_textlines(textline_images)
+    print(extracted_texts['preds'])
+    ```
+
+    Note:
+    - This function requires the `transformers` library from Hugging Face and PIL library to run.
+    - Ensure that the model 'microsoft/trocr-base-handwritten' is correctly loaded and the 
+      `transformers` library is updated to use the pipeline.
+    """
+    
+    model_name = "microsoft/trocr-base-handwritten"
+    pipe = pipeline("image-to-text", model=model_name)
+
+    # Model inference
+    textline_preds = []
+    len_array = len(textline_images['array'])
+    for i, textline in enumerate(textline_images['array'][:]):
+        if i % 10 == 1:
+            print(f'Processing image no. {i} of {len_array}')
+        textline = Image.fromarray(textline)
+        textline_preds.append(pipe(textline))
+
+    # Convert to dict
+    preds = [pred[0]['generated_text'] for pred in textline_preds]
+    textline_preds_dict = {'preds': preds}
+
+    return textline_preds_dict
+
+
+def adjust_font_size(draw, text, box_width):
+    """
+    Adjusts the font size to ensure the text fits within a specified width.
+
+    Parameters:
+    - draw (ImageDraw.Draw): An instance of ImageDraw.Draw used to render the text.
+    - text (str): The text string to be rendered.
+    - box_width (int): The maximum width in pixels that the text should occupy.
+
+    Returns:
+    - ImageFont: A font object with a size adjusted to fit the text within the specified width.
+    """
+
+    for font_size in range(1, 200):  # Adjust the range as needed
+        font = ImageFont.load_default(font_size)
+        text_width = draw.textlength(text, font=font)
+        if text_width > box_width:
+            font_size = int(font_size - 10)
+            return ImageFont.load_default(font_size)  # Return the last fitting size
+    return font  # Return max size if none exceeded the box
+
+
+def create_text_overlay_image(textline_images, textline_preds, img_shape, font_size=-1):
+    """
+    Creates an image overlay with text annotations based on provided bounding box information and predictions.
+
+    Parameters:
+    - textline_images (dict): A dictionary containing the bounding box data for each text segment. 
+      It should have keys 'left', 'center', 'width', and optionally 'height'. Each key should have 
+      a list of values corresponding to each text segment's properties.
+    - textline_preds (dict): A dictionary containing the predicted text segments. It should have 
+      a key 'preds' which holds a list of text predictions corresponding to the bounding boxes in 
+      textline_images.
+    - img_shape (tuple): A tuple representing the shape of the image where the text is to be drawn. 
+      The format should be (height, width).
+    - font_size (int, optional): Specifies the font size for the text. If set to -1 (default), the font size 
+      is dynamically adjusted to fit the text within its bounding box width using the `adjust_font_size` 
+      function. If a specific integer is provided, it uses that size for all text segments.
+
+    Returns:
+    - Image: An image object with text drawn over a blank white background.
+
+    Raises:
+    - AssertionError: If the lengths of the lists in `textline_images` and `textline_preds['preds']` 
+      do not correspond, indicating a mismatch in the number of bounding boxes and text predictions.
+
+    Example usage:
+    ```python
+    img_overlay = create_text_overlay_image(textline_images, textline_preds, (500, 800))
+    img_overlay.show()
+    ```
+    """
+
+    for key in textline_images.keys():
+        assert len(textline_images[key]) == len(textline_preds['preds']), f'Length of {key} and preds doesnt correspond'
+
+    # Create a blank white image
+    img_gen = Image.new('RGB', (img_shape[1], img_shape[0]), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img_gen)
+
+    # Draw each text segment within its bounding box
+    for i in range(len(textline_preds['preds'])):
+        left_x = textline_images['left'][i]
+        center_y = textline_images['center'][i][1]
+        #height = textline_images['height'][i]
+        width = textline_images['width'][i]
+        text = textline_preds['preds'][i]
+        
+        # dynamic or static text size
+        if font_size==-1:
+            font = adjust_font_size(draw, text, width)
+        else:
+            font = ImageFont.load_default(font_size)
+        draw.text((left_x, center_y), text, fill=(0, 0, 0), font=font, align='left')
+
+    return img_gen

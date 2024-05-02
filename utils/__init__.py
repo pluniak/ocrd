@@ -1,1 +1,1 @@
-from .helpers import extract_and_deskew_textlines, resize_image, return_scaled_image, do_prediction, write_dict_to_json, load_json_to_dict
+from .helpers import extract_and_deskew_textlines, resize_image, return_scaled_image, do_prediction, write_dict_to_json, load_json_to_dict, perform_ocr_on_textlines, adjust_font_size, create_text_overlay_image
