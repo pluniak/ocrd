@@ -33,7 +33,36 @@ def return_scaled_image(img, num_col, width_early):
     return img_new
 
 
-def visualize_model_output(prediction, img, model_name):
+def visualize_model_output(prediction, img):
+    """
+    Visualizes the output of a model prediction by overlaying predicted classes with distinct colors onto the original image.
+
+    Parameters:
+    - prediction (ndarray): A 3D array where the first channel holds the class predictions.
+    - img (ndarray): The original image to overlay predictions onto. This should be in the same dimensions or resized accordingly.
+
+    Returns:
+    - ndarray: An image where the model's predictions are overlaid on the original image using a predefined color map.
+
+    Description:
+    The function first identifies unique classes present in the prediction's first channel. Each class is assigned a specific color from a predefined dictionary `rgb_colors`. The function then creates an output image where each pixel's color corresponds to the class predicted at that location.
+
+    The function resizes the original image to match the dimensions of the prediction if necessary. It then blends the original image and the colored prediction output using OpenCV's `addWeighted` method to produce a final image that highlights the model's predictions with transparency.
+
+    Example usage:
+    ```python
+    prediction = model.predict(some_input)
+    original_image = cv2.imread('path_to_image.jpg')
+    visualization = visualize_model_output(prediction, original_image)
+    plt.imshow(visualization)
+    ```
+
+    Note:
+    - This function relies on `numpy` for array manipulations and `cv2` for image processing.
+    - Ensure the `rgb_colors` dictionary contains enough colors for all classes your model can predict.
+    - The function assumes `prediction` array's shape is compatible with `img`.
+    """
+
     unique_classes = np.unique(prediction[:,:,0])
     rgb_colors = {'0' : [255, 255, 255],
                     '1' : [255, 0, 0],
@@ -65,7 +94,8 @@ def visualize_model_output(prediction, img, model_name):
     output = output.astype(np.int32)
     img = img.astype(np.int32)
     
-    added_image = cv2.addWeighted(img,0.5,output,0.1,0)
+    #added_image = cv2.addWeighted(img,0.5,output,0.1,0) # orig by eynollah (gives dark image output)
+    added_image = cv2.addWeighted(img,0.8,output,0.2,10)
         
     return added_image
 
@@ -230,71 +260,64 @@ def do_prediction(model, img):
 
     prediction_true = prediction_true.astype(np.uint8)
     return prediction_true
-            
-
-# def extract_textlines(img, textline_mask):
-#     """
-#     Extracts textline segments from the image using a mask, with filters to remove unlikely text boxes.
-
-#     Args:
-#     img: cv2.Image - Original image from which textlines are to be extracted.
-#     textline_mask: array-like - Binary image with textline segments labeled.
-
-#     Returns:
-#     textline_images: List of tuples, each containing an image of an extracted textline and its position.
-#     """
-#     num_labels, labels_im = cv2.connectedComponents(textline_mask)
-#     bounding_boxes = []
-
-#     for label in range(1, num_labels):
-#         mask = np.where(labels_im == label, 255, 0).astype('uint8')
-#         x, y, w, h = cv2.boundingRect(mask)
-#         bounding_boxes.append((x, y, w, h))
-
-#     # Calculate median width and height
-#     if bounding_boxes:
-#         median_width = np.median([w for _, _, w, _ in bounding_boxes])
-#         median_height = np.median([h for _, _, _, h in bounding_boxes])
-
-#         # Filter boxes that are too small or improperly shaped
-#         textline_images = []
-#         for x, y, w, h in bounding_boxes:
-#             if w > 0.5 * median_width and h > 0.5 * median_height and w > h:
-#                 cropped_image = img[y:y+h, x:x+w]
-#                 textline_images.append((cropped_image, x, y, w, h))
-
-#     return textline_images
 
 
-def extract_and_deskew_textlines(img, textline_mask, size_filter=True):
+def extract_filter_and_deskew_textlines(img, textline_mask, min_pixel_sum=20, median_bounds=(.5, 20)):
 
     """
-    Extracts and deskews textlines from an image based on the provided textline mask. It calculates
-    the minimum area rectangle for contours, performs perspective transformations to deskew the text,
-    and handles potential rotations to ensure text lines are horizontal. 
+    Extracts and deskews text lines from an image based on a provided textline mask. This function identifies
+    text lines, filters out those that do not meet size criteria, calculates their minimum area rectangles,
+    performs perspective transformations to deskew each text line, and handles potential rotations to ensure
+    text lines are presented horizontally.
 
-    Args:
-    img (3D np.array): The original image from which to extract textlines.
-    textline_mask (2D np.array): A binary mask where textlines have been segmented.
-    filter
+    Parameters:
+    - img (numpy.ndarray): The original image from which to extract and deskew text lines. It should be a 3D array.
+    - textline_mask (numpy.ndarray): A binary mask where text lines have been segmented. It should be a 2D array.
+    - min_pixel_sum (int, optional): The minimum number of pixels (area) a connected component must have to be considered
+      a valid text line.
+    - median_bounds (tuple, optional): A tuple representing the lower and upper bounds as multipliers for filtering
+      text lines based on the median size of identified text lines.
 
     Returns:
-    list: A list of tuples for each textline, containing:
-          - de-skewed image (np.array) as well as center, height and width of the original bounding box (tuple)
+    - tuple: 
+        - dict: A dictionary containing lists of the extracted and deskewed text line images along with their
+          metadata (center, left side, height, width, and rotation angle of the bounding box).
+        - numpy.ndarray: An image visualization of the filtered text line mask for debugging or analysis.
+
+    Description:
+    The function first uses connected components to identify potential text lines from the mask. It filters these
+    based on absolute size (min_pixel_sum) and relative size (median_bounds). For each valid text line, it computes
+    a minimum area rectangle, extracts and deskews the bounded region. This includes rotating the text line if it
+    is detected as vertical (taller than wide). Finally, it aggregates the results and provides an image for
+    visualization of the text lines retained after filtering.
+
+    Example usage:
+    ```python
+    original_img = cv2.imread('path_to_image.jpg', cv2.IMREAD_COLOR)
+    textline_mask = cv2.imread('path_to_textline_mask.png', cv2.IMREAD_GRAYSCALE)
+    extracted_textlines, filtered_mask_image = extract_filter_and_deskew_textlines(original_img, textline_mask)
+    plt.imshow(filtered_mask_image*255, cmap='gray')
+    ```
+
+    Notes:
+    - This function assumes the textline_mask is properly segmented and binary (0s for background, 255 for text lines).
+    - Errors in perspective transformation due to incorrect contour extraction or bounding box calculations are handled
+      gracefully, reporting the error but continuing with other text lines.
     """
     
     num_labels, labels_im = cv2.connectedComponents(textline_mask)
 
     # Thresholds for filtering
-    MIN_PIXEL_SUM = 30 # absolute filtering
-    MEDIAN_LOWER_BOUND = .5 # relative filtering
-    MEDIAN_HIGHER_BOUND = 5 # relative filtering
+    MIN_PIXEL_SUM = min_pixel_sum # absolute filtering
+    MEDIAN_LOWER_BOUND = median_bounds[0] # relative filtering
+    MEDIAN_UPPER_BOUND = median_bounds[1] # relative filtering
 
     # Gather masks and their sizes
     cc_sizes = []
     masks = []
-    for label in range(1, num_labels):
-        mask = np.where(labels_im == label, 1, 0)
+    labels_im_filtered = labels_im > 0 # for visualizing filtering result
+    for label in range(1, num_labels): # ignore background class
+        mask = np.where(labels_im == label, True, False)
         if mask.sum() > MIN_PIXEL_SUM: # dismiss mini segmentations to avoid skewing of median
             cc_sizes.append(mask.sum())
             masks.append(mask)
@@ -303,9 +326,10 @@ def extract_and_deskew_textlines(img, textline_mask, size_filter=True):
     rectangles = []
     median = np.median(cc_sizes)
     for mask in masks:
-        if mask.sum() > median*MEDIAN_LOWER_BOUND and mask.sum() < median*MEDIAN_HIGHER_BOUND:
+        if mask.sum() > median*MEDIAN_LOWER_BOUND and mask.sum() < median*MEDIAN_UPPER_BOUND:
+            labels_im_filtered[mask > 0] = False
             mask = (mask*255).astype(np.uint8)
-            contours, _ = cv2.findContours(mask.astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             rect = cv2.minAreaRect(contours[0])
             rectangles.append(rect)
 
@@ -349,17 +373,25 @@ def extract_and_deskew_textlines(img, textline_mask, size_filter=True):
         # cast to dict
         keys = ['array', 'center', 'left', 'height', 'width', 'rotation_angle']
         textline_images = {key: [tup[i] for tup in textline_images] for i, key in enumerate(keys)}
+        num_labels_filtered = len(textline_images['array'])
+        labels_im_filtered = np.repeat(labels_im_filtered[:, :, np.newaxis], 3, axis=2).astype(np.uint8) # 3 color channels for plotting
+        print(f'Kept {num_labels_filtered} of {num_labels} text segments after size filtering.')
+        print(f'Median segment size (pixel sum) used for filtering: {int(median)}.')
+        print(f'All segments deleted smaller than {MIN_PIXEL_SUM} pixels (absolute min size).')
+        print(f'All segments deleted smaller than {median*MEDIAN_LOWER_BOUND} pixels (lower median bound).')
+        print(f'All segments deleted bigger than {median*MEDIAN_UPPER_BOUND} pixels (upper median bound).')
 
-    return textline_images #, cc_sizes
+    return textline_images, labels_im_filtered # np.expand_dims(lables_im_filtered, -1) #, cc_sizes
 
 
-def perform_ocr_on_textlines(textline_images):
+def perform_ocr_on_textlines(textline_images, model_name="microsoft/trocr-base-handwritten"):
     """
     Processes a list of image arrays using a pre-trained OCR model to extract text.
 
     Parameters:
     - textline_images (dict): A dictionary with a key 'array' that contains a list of image arrays. 
       Each image array represents a line of text that will be processed by the OCR model.
+    - model_name (str): A huggingface model trained for OCR on single text lines
 
     Returns:
     - dict: A dictionary containing a list of extracted text under the key 'preds'.
@@ -384,15 +416,16 @@ def perform_ocr_on_textlines(textline_images):
       `transformers` library is updated to use the pipeline.
     """
     
-    model_name = "microsoft/trocr-base-handwritten"
-    pipe = pipeline("image-to-text", model=model_name)
+    print('Hi')
+    pipe = pipeline("image-to-text", model=model_name, from_pt=True)
+    print('Hi')
 
     # Model inference
     textline_preds = []
     len_array = len(textline_images['array'])
     for i, textline in enumerate(textline_images['array'][:]):
         if i % 10 == 1:
-            print(f'Processing image no. {i} of {len_array}')
+            print(f'Processing textline no. {i} of {len_array}')
         textline = Image.fromarray(textline)
         textline_preds.append(pipe(textline))
 
