@@ -416,9 +416,7 @@ def perform_ocr_on_textlines(textline_images, model_name="microsoft/trocr-base-h
       `transformers` library is updated to use the pipeline.
     """
     
-    print('Hi')
-    pipe = pipeline("image-to-text", model=model_name, from_pt=True)
-    print('Hi')
+    pipe = pipeline("image-to-text", model=model_name)
 
     # Model inference
     textline_preds = []
