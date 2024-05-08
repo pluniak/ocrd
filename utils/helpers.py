@@ -274,9 +274,9 @@ def extract_filter_and_deskew_textlines(img, textline_mask, min_pixel_sum=20, me
     - img (numpy.ndarray): The original image from which to extract and deskew text lines. It should be a 3D array.
     - textline_mask (numpy.ndarray): A binary mask where text lines have been segmented. It should be a 2D array.
     - min_pixel_sum (int, optional): The minimum number of pixels (area) a connected component must have to be considered
-      a valid text line.
+      a valid text line. If None, no filtering is applied.
     - median_bounds (tuple, optional): A tuple representing the lower and upper bounds as multipliers for filtering
-      text lines based on the median size of identified text lines.
+      text lines based on the median size of identified text lines. If None, no filtering is applied.
 
     Returns:
     - tuple: 
@@ -318,7 +318,11 @@ def extract_filter_and_deskew_textlines(img, textline_mask, min_pixel_sum=20, me
     labels_im_filtered = labels_im > 0 # for visualizing filtering result
     for label in range(1, num_labels): # ignore background class
         mask = np.where(labels_im == label, True, False)
-        if mask.sum() > MIN_PIXEL_SUM: # dismiss mini segmentations to avoid skewing of median
+        if MIN_PIXEL_SUM is None:
+            is_above_min_pixel_sum = True
+        else:
+            is_above_min_pixel_sum = mask.sum() > MIN_PIXEL_SUM
+        if is_above_min_pixel_sum: # dismiss mini segmentations to avoid skewing of median
             cc_sizes.append(mask.sum())
             masks.append(mask)
 
@@ -326,12 +330,22 @@ def extract_filter_and_deskew_textlines(img, textline_mask, min_pixel_sum=20, me
     rectangles = []
     median = np.median(cc_sizes)
     for mask in masks:
-        if mask.sum() > median*MEDIAN_LOWER_BOUND and mask.sum() < median*MEDIAN_UPPER_BOUND:
+        mask_sum = mask.sum()
+        if MEDIAN_LOWER_BOUND is None:
+            is_above_lower_media_bound = True
+        else:
+            is_above_lower_media_bound = mask_sum > median*MEDIAN_LOWER_BOUND
+        if MEDIAN_UPPER_BOUND is None:
+            is_below_upper_median_bound = True
+        else:
+            is_below_upper_median_bound = mask_sum < median*MEDIAN_UPPER_BOUND
+        if is_above_lower_media_bound and is_below_upper_median_bound:
             labels_im_filtered[mask > 0] = False
             mask = (mask*255).astype(np.uint8)
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             rect = cv2.minAreaRect(contours[0])
-            rectangles.append(rect)
+            if np.prod(rect[1]) > 0: # filter out if height or width = 0
+                rectangles.append(rect)
 
     # Transform (rotated) bounding boxes to horizontal; store together with rotation angle for downstream process re-transform
     if rectangles:
@@ -375,11 +389,14 @@ def extract_filter_and_deskew_textlines(img, textline_mask, min_pixel_sum=20, me
         textline_images = {key: [tup[i] for tup in textline_images] for i, key in enumerate(keys)}
         num_labels_filtered = len(textline_images['array'])
         labels_im_filtered = np.repeat(labels_im_filtered[:, :, np.newaxis], 3, axis=2).astype(np.uint8) # 3 color channels for plotting
-        print(f'Kept {num_labels_filtered} of {num_labels} text segments after size filtering.')
-        print(f'Median segment size (pixel sum) used for filtering: {int(median)}.')
+        print(f'Kept {num_labels_filtered} of {num_labels} text segments after filtering.')
         print(f'All segments deleted smaller than {MIN_PIXEL_SUM} pixels (absolute min size).')
-        print(f'All segments deleted smaller than {median*MEDIAN_LOWER_BOUND} pixels (lower median bound).')
-        print(f'All segments deleted bigger than {median*MEDIAN_UPPER_BOUND} pixels (upper median bound).')
+        if MEDIAN_LOWER_BOUND is not None:
+            print(f'All segments deleted smaller than {median*MEDIAN_LOWER_BOUND} pixels (lower median bound).')
+        if MEDIAN_UPPER_BOUND is not None:
+            print(f'All segments deleted bigger than {median*MEDIAN_UPPER_BOUND} pixels (upper median bound).')
+        if MEDIAN_LOWER_BOUND is not None or MEDIAN_UPPER_BOUND is not None:
+            print(f'Median segment size (pixel sum) used for filtering: {int(median)}.')
 
     return textline_images, labels_im_filtered # np.expand_dims(lables_im_filtered, -1) #, cc_sizes
 
