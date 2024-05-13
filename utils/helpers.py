@@ -165,16 +165,35 @@ def binarize_image(img, binarize_mode):
 
 
 def do_prediction(model, img):
-    #img_org = np.copy(img)       
+    """
+    Processes an image to predict segmentation outputs using a given model. The function handles image resizing 
+    to match the model's input dimensions and ensures that the entire image is processed by segmenting it into patches 
+    that the model can handle. The prediction from these patches is then reassembled into a single output image.
+
+    Parameters:
+    - model (keras.Model): The neural network model used for predicting the image segmentation. The model should have 
+                           predefined input dimensions (height and width).
+    - img (ndarray): The image to be processed, represented as a numpy array.
+
+    Returns:
+    - prediction_true (ndarray): An image of the same size as the input image, containing the segmentation prediction 
+                                 with each pixel labeled according to the model's output.
+
+    Details:
+    - The function first scales the input image according to the model's required input dimensions. If the scaled image 
+      is smaller than the model's height or width, it is resized to match exactly.
+    - The function processes the image in overlapping patches to ensure smooth transitions between the segments. These 
+      patches are then processed individually through the model.
+    - Predictions from these patches are then stitched together to form a complete output image, ensuring that edge 
+      artifacts are minimized by carefully blending the overlapping areas.
+    - This method assumes the availability of `return_scaled_image` and `resize_image` functions for scaling and resizing 
+      operations, respectively.
+    - The output is converted to an 8-bit image before returning, suitable for display or further processing.
+    """
 
     # bitmap output
     img_height_model=model.layers[len(model.layers)-1].output_shape[1]
     img_width_model=model.layers[len(model.layers)-1].output_shape[2]
-    #n_classes=model.layers[len(model.layers)-1].output_shape[3]
-
-    #img_org = np.copy(img)
-    #img_height_h = img_org.shape[0]
-    #img_width_h = img_org.shape[1]
 
     num_col_classifier = 1 # only one column text pages for demo
     width_early = img.shape[1]
@@ -196,7 +215,6 @@ def do_prediction(model, img):
     img_h = img.shape[0]
     img_w = img.shape[1]
     prediction_true = np.zeros((img_h, img_w, 3))
-    #mask_true = np.zeros((img_h, img_w))
     nxf = img_w / float(width_mid)
     nyf = img_h / float(height_mid)
     nxf = int(nxf) + 1 if nxf > int(nxf) else int(nxf)
@@ -259,6 +277,7 @@ def do_prediction(model, img):
                 prediction_true[index_y_d + margin : index_y_u - margin, index_x_d + margin : index_x_u - margin, :] = seg_color
 
     prediction_true = prediction_true.astype(np.uint8)
+
     return prediction_true
 
 
