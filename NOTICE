@@ -1,0 +1,7 @@
+NOTICE: Additional Components and Licenses
+
+This product includes software developed by the QURATOR project (https://github.com/qurator-spk/eynollah). The eynollah tool is used under its Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
+
+This product also incorporates models from Microsoft's trocr, available under an MIT License. Details on the trocr project and its license can be found at the project's repository: https://github.com/microsoft/unilm.
+
+Licenses for all mentioned components are included in the LICENSES directory of this distribution.
