@@ -63,7 +63,7 @@ class OCRD:
     """
     
     def __init__(self, img_path):
-        self.image = imageio.imread(img_path)
+        self.image = np.array(Image.open(img_path))
 
     def scale_image(self, img):
         """

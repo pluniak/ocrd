@@ -1,15 +1,11 @@
 import gradio as gr
-# import tensorflow as tf
-# import numpy as np
-# import cv2
-# from PIL import Image
-# from huggingface_hub import from_pretrained_keras
 import sys
-sys.path.append('.')
+sys.path.append('../src/')
 from utils.helpers import OCRD
 
 
-def run_ocrd_pipeline(img_path, binarize_mode='detailed', min_pixel_sum='default', median_bounds='default', font_size='default'):
+
+def run_ocrd_pipeline(img_path, status=gr.Progress(), binarize_mode='detailed', min_pixel_sum=30, median_bounds=(None, None), font_size=30):
     """
     Executes the OCRD pipeline on an image from file loading to text overlay creation. This function orchestrates
     the calling of various OCRD class methods to process the image, extract and recognize text, and then overlay
@@ -19,11 +15,10 @@ def run_ocrd_pipeline(img_path, binarize_mode='detailed', min_pixel_sum='default
         img_path (str): Path to the image file.
         binarize_mode (str): Mode to be used for image binarization. Can be 'detailed', 'fast', or 'no'.
         min_pixel_sum (int, optional): Minimum sum of pixels to consider a text line segmentation for extraction. 
-            If 'default', default values are applied. Check function definition for details.
+            If 'default', default values are applied.
         median_bounds (tuple, optional): Bounds to filter text line segmentations based on size relative to the median. 
-            If 'default', default values are applied. Check function definition for details.
+            If 'default', default values are applied.
         font_size (int, optional): Font size to be used in text overlay. If 'default', a default size or scaling logic is applied.
-            Check function definition for details.
 
     Returns:
         Image: An image with overlay text, where text is extracted and recognized from the original image.
@@ -48,73 +43,45 @@ def run_ocrd_pipeline(img_path, binarize_mode='detailed', min_pixel_sum='default
         ctoi_kwargs['font_size'] = font_size
 
     # run pipeline
+    #status(0, desc="\nReading image...\n")
     ocrd = OCRD(img_path)
-    print('\nBinarizing image...\n')
+    status(0, desc='\nStep 1/5: Binarizing image...\n')
     binarized = ocrd.binarize_image(ocrd.image, binarize_mode)
-    print('\nSegmenting textlines...\n')
+    status(0, desc='\nStep 2/5: Segmenting textlines...\n')
     textline_segments = ocrd.segment_textlines(binarized)
-    print('\nExtracting, filtering and de-skewing textlines...\n')
+    status(0, desc='\nStep 3/5: Extracting, filtering and de-skewing textlines...\n')
     image_scaled = ocrd.scale_image(ocrd.image)  # textline_segments were predicted on rescaled image
     textline_images, _ = ocrd.extract_filter_and_deskew_textlines(image_scaled, textline_segments[...,0], **efadt_kwargs)
-    print('\nOCR on textlines...\n')
+    status(0, desc='\nStep 4/5: OCR on textlines...\n')
     textline_preds = ocrd.ocr_on_textlines(textline_images)
-    print('\nCreating output overlay image...')
+    status(0, desc='\nStep 5/5: Creating output overlay image...')
     img_gen = ocrd.create_text_overlay_image(textline_images, textline_preds, (image_scaled.shape[0], image_scaled.shape[1]), **ctoi_kwargs)
-    print('\nJOB COMPLETED\n')
+    status(1, desc='\nJOB COMPLETED\n')
 
     return img_gen
 
 
+demo_data = [
+    '../src/demo_data/act_image.jpg',
+    '../src/demo_data/newjersey1_image.jpg',
+    '../src/demo_data/newjersey2_image.jpg',
+    '../src/demo_data/notes_image.jpg',
+    '../src/demo_data/washington_image.jpg'
+]
 
 
-
-title = "Welcome to the Eynollah Demo page! 👁️"
-description = """
- <div class="row" style="display: flex">
-  <div class="column" style="flex: 50%; font-size: 17px">
-        This Space demonstrates the functionality of various Eynollah models developed at <a rel="nofollow" href="https://huggingface.co/SBB">SBB</a>.
-        <br><br>
-        The Eynollah suite introduces an <u>end-to-end pipeline</u> to extract layout, text lines and reading order for historic documents, where the output can be used as an input for OCR engines.
-        Please keep in mind that with this demo you can just use <u>one of the 13 sub-modules</u> of the whole Eynollah system <u>at a time</u>.
-  </div>
-  <div class="column" style="flex: 5%; font-size: 17px"></div>
-  <div class="column" style="flex: 45%; font-size: 17px">
-    <strong style="font-size: 19px">Resources for more information:</strong>
-        <ul>
-            <li>The GitHub Repo can be found <a rel="nofollow" href="https://github.com/qurator-spk/eynollah">here</a></li>
-            <li>Associated Paper: <a rel="nofollow" href="https://doi.org/10.1145/3604951.3605513">Document Layout Analysis with Deep Learning and Heuristics</a></li>
-            <li>The full Eynollah pipeline can be viewed <a rel="nofollow" href="https://huggingface.co/spaces/SBB/eynollah-demo-test/blob/main/eynollah-flow.png">here</a></li>
-        </ul>
-    </li>
-  </div>
-</div> 
-"""
-iface = gr.Interface(
-            title=title,
-            description=description,
-            fn=do_prediction, 
-            inputs=[
-                gr.Dropdown([
-                    "SBB/eynollah-binarization", 
-                    "SBB/eynollah-enhancement",
-                    "SBB/eynollah-page-extraction", 
-                    "SBB/eynollah-column-classifier",
-                    "SBB/eynollah-tables",
-                    "SBB/eynollah-textline",
-                    "SBB/eynollah-textline_light",
-                    "SBB/eynollah-main-regions",
-                    "SBB/eynollah-main-regions-aug-rotation",
-                    "SBB/eynollah-main-regions-aug-scaling",
-                    "SBB/eynollah-main-regions-ensembled",
-                    "SBB/eynollah-full-regions-1column",
-                    "SBB/eynollah-full-regions-3pluscolumn"
-                ], label="Select one model of the Eynollah suite 👇", info=""),
-                gr.Image()
-            ], 
-            outputs=[
-              gr.Textbox(label="Output of model (numerical or bitmap) ⬇️"),
-              gr.Image()
-            ],
-            #examples=[['example-1.jpg']]
-        )
+iface = gr.Interface(run_ocrd_pipeline,
+                     title="OCRD Pipeline",
+                     description="<ul><li>This interactive demo showcases an 'Optical Character Recognition Digitization' pipeline that processes \
+                                  images to recognize text.</li> \
+                                  <li>Steps include binarization, text line segmentation, extraction, filtering and deskewing as well as OCR. \
+                                  Results are displayed as a generated overlay image.</li> \
+                                  <li>Optimized for English; other languages (e.g. German) may require OCR model fine-tuning.</li> \
+                                  <li>Uses free CPU-based compute, which is rather slow. A pipeline run will take up to 10 minutes. \
+                                  For lengthy waits, pre-computed demo results are available for download: https://github.com/pluniak/ocrd/tree/main/src/demo_data.</li> \
+                                  <li>Note: The demo is just a first version! OCR performance and computation speed can be optimized.</li> \
+                                  <li>The demo is based on code from my GitHub repository: https://github.com/pluniak/ocrd/tree/main</li></ul>",
+                     inputs=[gr.Image(type='filepath', label='Input image')],
+                     outputs=gr.Image(label='Output image: overlay with recognized text', type='pil', format='jpeg'),
+                     examples=demo_data)
 iface.launch()
