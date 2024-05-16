@@ -4,7 +4,6 @@ import json
 from PIL import Image, ImageDraw, ImageFont
 from transformers import pipeline
 from huggingface_hub import from_pretrained_keras
-import imageio
 
 
 def resize_image(img_in,input_height,input_width):
@@ -481,7 +480,7 @@ class OCRD:
             font = ImageFont.load_default(font_size)
             text_width = draw.textlength(text, font=font)
             if text_width > box_width:
-                font_size = int(font_size - 10)
+                font_size = max(5, int(font_size - 10)) # min font size of 5
                 return ImageFont.load_default(font_size)  # Return the last fitting size
         return font  # Return max size if none exceeded the box
 
