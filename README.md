@@ -1,5 +1,5 @@
 # ocrd
-Optical Character Recognition Digitization
+This is a demo project for Optical Character Recognition Digitization as a gradio app. Learn more and try out the demo here: https://huggingface.co/spaces/pluniak/ocrd
 
 ## Acknowledgements and Attributions
 
