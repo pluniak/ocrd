@@ -1,11 +1,7 @@
 torch==2.2.2
-#torchvision==0.17.2
-#torchaudio==2.2.2
 tensorflow-cpu==2.15
 opencv-python==4.9.0.80
 huggingface_hub==0.22.2
 transformers==4.40.1
 imageio==2.34.1
-#scikit-image==0.23.2
 gradio==4.31.1
-#gradio_client==0.16.3
