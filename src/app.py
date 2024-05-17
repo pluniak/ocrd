@@ -1,3 +1,6 @@
+### Purpose of file: Putting app.ipynb into a script as needed for the Gradio app ### 
+
+
 import gradio as gr
 import sys
 sys.path.append('../src/')
