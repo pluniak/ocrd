@@ -1,5 +1,5 @@
 # ocrd
-This is a demo project for Optical Character Recognition Digitization of full text pages as a gradio app. It makes use of freely available software components only. Learn more and try out the demo here: https://huggingface.co/spaces/pluniak/ocrd
+This is a demo project for Optical Character Recognition Digitization of full text pages. It is designed for use as a Huggingface Gradio app. The demo makes use of freely available software components only. Learn more and try out the demo here: https://huggingface.co/spaces/pluniak/ocrd
 
 ## Acknowledgements and Attributions
 
