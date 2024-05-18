@@ -1,9 +1,9 @@
 # OCRD Project
 
 ## Description
-This is a demo project for Optical Character Recognition Digitization of full text pages. It is designed for use as a Hugging Face Gradio app. 
+This is a demo project for "Optical Character Recognition Digitization" of full text pages. It is designed for use as a Hugging Face Gradio app. 
 
-Pipeline steps include:
+The underlying processing pipeline includes:
   1. Image binarization
   2. Text line segmentation
   3. Text line extraction, filtering, and deskewing
