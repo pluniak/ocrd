@@ -11,11 +11,9 @@ For running the app on your local computer, follow the steps below.
 ```bash
 git clone https://github.com/yourusername/ocrd.git
 cd ocrd
-# Linux
-./create_conda_env_linux.sh 
-# Windows (using Conda terminal)
-create_conda_env_windows.bat
-conda activate ocrd-env
+./create_conda_env_linux.sh # Linux
+create_conda_env_windows.bat # Windows (using Conda terminal)
+conda activate ocrd
 ```
 
 ## Run app locally from CLI
