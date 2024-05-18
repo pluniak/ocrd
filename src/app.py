@@ -74,9 +74,9 @@ def run_ocrd_pipeline(img_path, font_size=30, binarize_mode='detailed', min_pixe
 
 
 demo_data = [
-    ['../src/demo_data/act_image.jpg', None],
-    ['../src/demo_data/newjersey2_image.jpg', None],
-    ['../src/demo_data/washington_image.jpg', None]
+    ['../data/demo_data/act_image.jpg', None],
+    ['../data/demo_data/newjersey2_image.jpg', None],
+    ['../data/demo_data/washington_image.jpg', None]
 ]
 
 description = """<ul>
@@ -92,7 +92,7 @@ description = """<ul>
                     </li>
                     <li>Optimized for <b>English</b>; other languages (e.g., German) may require OCR model fine-tuning.</li>
                     <li>Uses free CPU-based compute, which is rather <b>slow</b>. A pipeline run will take up to 10 minutes.</li> 
-                    <li>For lengthy waits, click on the pre-computed examples below or look at example results at: <a href='https://github.com/pluniak/ocrd/tree/main/src/demo_data'>https://github.com/pluniak/ocrd/tree/main/src/demo_data</a></li>
+                    <li>For lengthy waits, click on the pre-computed examples below or look at example results at: <a href='https://github.com/pluniak/ocrd/tree/main/data/demo_data'>https://github.com/pluniak/ocrd/tree/main/data/demo_data</a></li>
                     <li>The demo is based on code from my GitHub repository: <a href='https://github.com/pluniak/ocrd'>https://github.com/pluniak/ocrd</a></li>
                     <li>Note: The demo is just a <b>first prototype</b>! OCR performance and computation speed should be optimized.</li>
                 </ul>"""
