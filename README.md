@@ -12,7 +12,7 @@ cd ocrd
 # or
 create_conda_env_windows.bat # using a Conda terminal in Windows
 conda activate ocrd-env
-pip install -r requirements.txt```
+```
 
 ## Run the app locally from the CLI
 python ./src/app.py
