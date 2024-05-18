@@ -8,7 +8,6 @@ Learn more and try out the demo here: https://huggingface.co/spaces/pluniak/ocrd
 For running the app on your local computer, follow the steps below.
 
 ## Installation
-Steps to install the project, for example:
 ```bash
 git clone https://github.com/yourusername/ocrd.git
 cd ocrd
