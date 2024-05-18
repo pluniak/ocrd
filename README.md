@@ -8,8 +8,10 @@ Learn more and try out the demo here: https://huggingface.co/spaces/pluniak/ocrd
 For running the app on your local computer, follow the steps below.
 
 ## Installation
+Install Anaconda if you haven't done yet: https://docs.anaconda.com/free/anaconda/install/windows/
+Then clone the ocrd repository and set up and activate the virtual environment from the CLI:
 ```bash
-git clone https://github.com/yourusername/ocrd.git
+git clone https://github.com/pluniak/ocrd.git
 cd ocrd
 ./create_conda_env_linux.sh # Linux
 create_conda_env_windows.bat # Windows (using Conda terminal)
