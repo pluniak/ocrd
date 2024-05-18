@@ -16,7 +16,7 @@ Please note:
 - For lengthy waits, look at the pre-computed examples: [https://github.com/pluniak/ocrd/tree/main/data/demo_data](https://github.com/pluniak/ocrd/tree/main/data/demo_data)
 - The demo is just a **first prototype**! OCR performance and computation speed should be optimized.
 
-Use the app:
+Usage:
   1. Try out the the demo online at https://huggingface.co/spaces/pluniak/ocrd
   2. or follow the steps below to install and run the app on your local computer.
 
