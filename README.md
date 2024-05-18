@@ -1,7 +1,11 @@
 # OCRD Project
 
 ## Description
-This is a demo project for Optical Character Recognition Digitization of full text pages. It is designed for use as a Hugging Face Gradio app. The demo makes use of freely available software components only. Learn more and try out the demo here: https://huggingface.co/spaces/pluniak/ocrd
+This is a demo project for Optical Character Recognition Digitization of full text pages. It is designed for use as a Hugging Face Gradio app. The demo makes use of freely available software components only. 
+
+Learn more and try out the demo here: https://huggingface.co/spaces/pluniak/ocrd
+
+For running the app on your local computer, follow the steps below.
 
 ## Installation
 Steps to install the project, for example:
@@ -15,7 +19,7 @@ create_conda_env_windows.bat
 conda activate ocrd-env
 ```
 
-## Run the app locally from the CLI
+## Run app locally from CLI
 ```bash
 python ./src/app.py
 ```
