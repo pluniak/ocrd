@@ -32,12 +32,13 @@ conda activate ocrd
 ```
 
 ## Run app locally
-### Web browser
+You can run the app locally as a Web Server or inside a Jupyter Notebook.
+### Web Server
 Execute script from CLI
 ```bash
 python ./src/app.py
 ```
-### Inside Jupyter Notebook
+### Jupyter Notebook
 Open notebook and execute cells
 ```bash
 ./notebooks/app.ipynb
