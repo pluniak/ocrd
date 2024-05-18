@@ -1,11 +1,24 @@
 # OCRD Project
 
 ## Description
-This is a demo project for Optical Character Recognition Digitization of full text pages. It is designed for use as a Hugging Face Gradio app. The demo makes use of freely available software components only. 
+This is a demo project for Optical Character Recognition Digitization of full text pages. It is designed for use as a Hugging Face Gradio app. 
 
-Learn more and try out the demo here: https://huggingface.co/spaces/pluniak/ocrd
+Pipeline steps include:
+  1. Image binarization
+  2. Text line segmentation
+  3. Text line extraction, filtering, and deskewing
+  4. OCR on text lines
+  5. Printing recognized text on generated image for visualization
 
-For running the app on your local computer, follow the steps below.
+Please note:
+- The app is optimized for **English**; other languages (e.g., German) may require OCR model fine-tuning.
+- When running on CPUs, a pipeline run can take up to 10 minutes.
+- For lengthy waits, look at the pre-computed examples: [https://github.com/pluniak/ocrd/tree/main/data/demo_data](https://github.com/pluniak/ocrd/tree/main/data/demo_data)
+- The demo is just a **first prototype**! OCR performance and computation speed should be optimized.
+
+Use the app:
+  1. Try out the the demo online at https://huggingface.co/spaces/pluniak/ocrd
+  2. or follow the steps below to run the app on your local computer.
 
 ## Installation
 Install Anaconda if you haven't done yet: https://docs.anaconda.com/free/anaconda/install
