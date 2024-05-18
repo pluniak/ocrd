@@ -11,7 +11,7 @@ For running the app on your local computer, follow the steps below.
 ```bash
 git clone https://github.com/yourusername/ocrd.git
 cd ocrd
-# Linux (using bash)
+# Linux
 ./create_conda_env_linux.sh 
 # Windows (using Conda terminal)
 create_conda_env_windows.bat
@@ -19,8 +19,14 @@ conda activate ocrd-env
 ```
 
 ## Run app locally from CLI
+### Web browser
 ```bash
 python ./src/app.py
+```
+### Inside Jupyter Notebook
+Execute cells in 
+```bash
+./notebooks/app.ipynb
 ```
 
 ## Acknowledgements and Attributions
