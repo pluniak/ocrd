@@ -16,13 +16,14 @@ create_conda_env_windows.bat # Windows (using Conda terminal)
 conda activate ocrd
 ```
 
-## Run app locally from CLI
+## Run app locally
 ### Web browser
+Execute script from CLI
 ```bash
 python ./src/app.py
 ```
 ### Inside Jupyter Notebook
-Execute cells in 
+Open notebook and execute cells
 ```bash
 ./notebooks/app.ipynb
 ```
