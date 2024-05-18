@@ -32,7 +32,7 @@ conda activate ocrd
 ```
 
 ## Run app locally
-You can run the app locally as a Web Server or inside a Jupyter Notebook.
+After activating the virtual environment, you can run the app locally as a Web Server or inside a Jupyter Notebook.
 ### Web Server
 Execute this script from CLI:
 ```bash
