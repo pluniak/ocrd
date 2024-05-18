@@ -8,14 +8,17 @@ Steps to install the project, for example:
 ```bash
 git clone https://github.com/yourusername/ocrd.git
 cd ocrd
-./create_conda_env_linux.sh # for Linux
-# or
-create_conda_env_windows.bat # using a Conda terminal in Windows
+# Linux (using bash)
+./create_conda_env_linux.sh 
+# Windows (using Conda terminal)
+create_conda_env_windows.bat
 conda activate ocrd-env
 ```
 
 ## Run the app locally from the CLI
+```bash
 python ./src/app.py
+```
 
 ## Acknowledgements and Attributions
 
