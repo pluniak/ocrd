@@ -22,7 +22,7 @@ Use the app:
 
 ## Installation
   1. Install Anaconda if you haven't done yet: https://docs.anaconda.com/free/anaconda/install
-  2. From CLI clone the ocrd repository and set up and activate the virtual environment:
+  2. From CLI clone this repository and set up and activate the virtual environment:
 ```bash
 git clone https://github.com/pluniak/ocrd.git
 cd ocrd
@@ -34,12 +34,12 @@ conda activate ocrd
 ## Run app locally
 You can run the app locally as a Web Server or inside a Jupyter Notebook.
 ### Web Server
-Execute script from CLI
+Execute this script from CLI:
 ```bash
 python ./src/app.py
 ```
 ### Jupyter Notebook
-Open notebook and execute cells
+Open and run this notebook:
 ```bash
 ./notebooks/app.ipynb
 ```
