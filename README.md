@@ -18,12 +18,11 @@ Please note:
 
 Use the app:
   1. Try out the the demo online at https://huggingface.co/spaces/pluniak/ocrd
-  2. or follow the steps below to run the app on your local computer.
+  2. or follow the steps below to install and run the app on your local computer.
 
 ## Installation
-Install Anaconda if you haven't done yet: https://docs.anaconda.com/free/anaconda/install
-
-Then clone the ocrd repository and set up and activate the virtual environment from the CLI:
+  1. Install Anaconda if you haven't done yet: https://docs.anaconda.com/free/anaconda/install
+  2. From CLI clone the ocrd repository and set up and activate the virtual environment:
 ```bash
 git clone https://github.com/pluniak/ocrd.git
 cd ocrd
