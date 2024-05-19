@@ -44,7 +44,7 @@ Open and run this notebook:
 ./notebooks/app.ipynb
 ```
 
-## OCRD Pipeline Demo
+## OCRD Pipeline Example
 
 ### Input and Output Image Generated from Recognized Text
 
@@ -52,6 +52,8 @@ Open and run this notebook:
   <img src="./data/demo_data/act_image.jpg" alt="Input Image" width="300" style="margin: 10px;"/>
   <img src="./data/demo_data/act_genImg.jpg" alt="Output Image" width="300" style="margin: 10px;"/>
 </div>
+
+For more examples visit: [https://github.com/pluniak/ocrd/tree/main/data/demo_data](https://github.com/pluniak/ocrd/tree/main/data/demo_data)
 
 
 ## Acknowledgements and Attributions
