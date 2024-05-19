@@ -17,7 +17,7 @@ Please note:
 - The demo is just a **first prototype**! OCR performance and computation speed should be optimized.
 
 Usage:
-  1. Try out the the demo online at https://huggingface.co/spaces/pluniak/ocrd
+  1. **Test the the demo** online at https://huggingface.co/spaces/pluniak/ocrd
   2. or follow the steps below to install and run the app on your local computer.
 
 ## Installation
