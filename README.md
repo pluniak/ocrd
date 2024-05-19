@@ -1,4 +1,4 @@
-# OCRD Project
+            # OCRD Project
 
 ## Description
 This is a demo project for "Optical Character Recognition Digitization" of full text pages. It is designed for use as a Hugging Face Gradio app. 
@@ -48,13 +48,13 @@ Open and run this notebook:
 
 ### Input and Output Images
 
-<div style="display: flex; justify-content: center; align-items: center;">
+<div style="display: flex; justify-content: center; align-items: flex-start;">
   <figure style="margin: 10px; text-align: center;">
-    <figcaption>Input Image</figcaption>
+    <figcaption style="margin-bottom: 5px;">Input Image</figcaption>
     <img src="./data/demo_data/act_image.jpg" alt="Input Image" width="300"/>
   </figure>
   <figure style="margin: 10px; text-align: center;">
-    <figcaption>Output Image</figcaption>
+    <figcaption style="margin-bottom: 5px;">Output Image</figcaption>
     <img src="./data/demo_data/act_genImg.jpg" alt="Output Image" width="300"/>
   </figure>
 </div>
