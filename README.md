@@ -44,6 +44,15 @@ Open and run this notebook:
 ./notebooks/app.ipynb
 ```
 
+## OCRD Pipeline Demo
+
+### Input Image
+![Input Image](./data/demo_data/act_image.jpg)
+
+### Output Image
+![Output Image generated from recognized text](./data/demo_data/act_genImg.jpg)
+
+
 ## Acknowledgements and Attributions
 
 This project makes use of significant components from the following open-source projects:
