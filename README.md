@@ -46,16 +46,16 @@ Open and run this notebook:
 
 ## OCRD Pipeline Demo
 
-### Input and Output Image
+### Input and Output Images
 
 <div style="display: flex; justify-content: center; align-items: center;">
   <figure style="margin: 10px; text-align: center;">
+    <figcaption>Input Image</figcaption>
     <img src="./data/demo_data/act_image.jpg" alt="Input Image" width="300"/>
-    <figcaption style="text-align: center;">Input Image</figcaption>
   </figure>
   <figure style="margin: 10px; text-align: center;">
+    <figcaption>Output Image</figcaption>
     <img src="./data/demo_data/act_genImg.jpg" alt="Output Image" width="300"/>
-    <figcaption style="text-align: center;">Output Image</figcaption>
   </figure>
 </div>
 
