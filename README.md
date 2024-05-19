@@ -49,11 +49,11 @@ Open and run this notebook:
 ### Input and Output Image
 
 <div style="display: flex; justify-content: center; align-items: center;">
-  <figure style="margin: 10px;">
+  <figure style="margin: 10px; text-align: center;">
     <img src="./data/demo_data/act_image.jpg" alt="Input Image" width="300"/>
     <figcaption style="text-align: center;">Input Image</figcaption>
   </figure>
-  <figure style="margin: 10px;">
+  <figure style="margin: 10px; text-align: center;">
     <img src="./data/demo_data/act_genImg.jpg" alt="Output Image" width="300"/>
     <figcaption style="text-align: center;">Output Image</figcaption>
   </figure>
