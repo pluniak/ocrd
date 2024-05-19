@@ -48,7 +48,7 @@ Open and run this notebook:
 
 ### Input and Output Image
 
-<p align="left">
+<p align="center">
   <figure>
     <img src="./data/demo_data/act_image.jpg" alt="Input Image" width="300"/>
     <figcaption>Input image</figcaption>
