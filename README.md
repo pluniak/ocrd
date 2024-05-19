@@ -46,17 +46,11 @@ Open and run this notebook:
 
 ## OCRD Pipeline Demo
 
-### Input and Output Images
+### Input and Output Image Generated from Recognized Text
 
-<div style="display: flex; justify-content: center; align-items: flex-start;">
-  <figure style="margin: 10px; text-align: center;">
-    <figcaption style="vertical-align:middle: 5px;">Input Image</figcaption>
-    <img src="./data/demo_data/act_image.jpg" alt="Input Image" width="300"/>
-  </figure>
-  <figure style="margin: 10px; text-align: center;">
-    <figcaption style="vertical-align:middle: 5px;">Output Image</figcaption>
-    <img src="./data/demo_data/act_genImg.jpg" alt="Output Image" width="300"/>
-  </figure>
+<div style="display: flex; justify-content: center; align-items: center;">
+  <img src="./data/demo_data/act_image.jpg" alt="Input Image" width="300" style="margin: 10px;"/>
+  <img src="./data/demo_data/act_genImg.jpg" alt="Output Image" width="300" style="margin: 10px;"/>
 </div>
 
 
