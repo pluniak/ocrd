@@ -22,7 +22,7 @@ Usage:
 
 ## Installation
   1. Install Anaconda if you haven't done yet: https://docs.anaconda.com/free/anaconda/install
-  2. From CLI clone this repository and set up and activate the virtual environment:
+  2. Clone the repository, then set up and activate the virtual environment:
 ```bash
 git clone https://github.com/pluniak/ocrd.git
 cd ocrd
