@@ -1,4 +1,4 @@
-            # OCRD Project
+# OCRD Project
 
 ## Description
 This is a demo project for "Optical Character Recognition Digitization" of full text pages. It is designed for use as a Hugging Face Gradio app. 
