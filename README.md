@@ -50,11 +50,11 @@ Open and run this notebook:
 
 <div style="display: flex; justify-content: center; align-items: flex-start;">
   <figure style="margin: 10px; text-align: center;">
-    <figcaption style="margin-bottom: 5px;">Input Image</figcaption>
+    <figcaption style="vertical-align:middle: 5px;">Input Image</figcaption>
     <img src="./data/demo_data/act_image.jpg" alt="Input Image" width="300"/>
   </figure>
   <figure style="margin: 10px; text-align: center;">
-    <figcaption style="margin-bottom: 5px;">Output Image</figcaption>
+    <figcaption style="vertical-align:middle: 5px;">Output Image</figcaption>
     <img src="./data/demo_data/act_genImg.jpg" alt="Output Image" width="300"/>
   </figure>
 </div>
