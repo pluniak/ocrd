@@ -46,11 +46,12 @@ Open and run this notebook:
 
 ## OCRD Pipeline Demo
 
-### Input Image
-![Input Image](./data/demo_data/act_image.jpg)
+### Input and Output Images
 
-### Output Image
-![Output Image generated from recognized text](./data/demo_data/act_genImg.jpg)
+<p align="center">
+  <img src="./data/demo_data/act_image.jpg" alt="Input image" width="300"/>
+  <img src="./data/demo_data/act_genImg.jpg" alt="Output image generated from recognized text" width="300"/>
+</p>
 
 
 ## Acknowledgements and Attributions
