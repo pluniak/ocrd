@@ -20,9 +20,6 @@ Usage:
   1. **Test the the demo** online at https://huggingface.co/spaces/pluniak/ocrd
   2. or follow the steps below to install and run the app on your local computer.
 
-Screenshot of the app user interface:
-<img src="./data/app_interface.jpg" alt="Input Image" width="1000" style="margin: 10px;"/>
-
 ## Installation
   1. Install Anaconda if you haven't done yet: https://docs.anaconda.com/free/anaconda/install
   2. Clone the repository, then set up and activate the virtual environment:
@@ -59,6 +56,8 @@ Open and run this notebook:
 
 For more examples visit: [https://github.com/pluniak/ocrd/tree/main/data/demo_data](https://github.com/pluniak/ocrd/tree/main/data/demo_data)
 
+## Screenshot of App User Interface
+<img src="./data/app_interface.jpg" alt="Input Image" width="1000" style="margin: 10px;"/>
 
 ## Acknowledgements and Attributions
 
