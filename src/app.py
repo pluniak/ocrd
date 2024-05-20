@@ -8,24 +8,22 @@ from utils.helpers import OCRD
 
 
 
-def run_ocrd_pipeline(img_path, font_size=30, binarize_mode='detailed', min_pixel_sum=30, median_bounds=(None, None), status=gr.Progress()):
+def run_ocrd_pipeline(img_path, font_size='small', binarize_mode='detailed', min_pixel_sum=30, median_bounds=(None, None), status=gr.Progress()):
     """
     Executes the OCRD pipeline on an image from file loading to text overlay creation. This function orchestrates
     the calling of various OCRD class methods to process the image, extract and recognize text, and then overlay
     this text on the original image.
-
     Parameters:
         img_path (str): Path to the image file.
-        font_size (int, optional): Font size to be used in text overlay. If 'default', a default size or scaling logic is applied.
+        font_size (int, optional): Font size to be used in text overlay. Can be 'small', 'medium', 'large' or 'adjusted'.
+            If set to 'adjusted', the font size is dynamically adjusted to fit the text within its bounding box width.
         binarize_mode (str): Mode to be used for image binarization. Can be 'detailed', 'fast', or 'no'.
         min_pixel_sum (int, optional): Minimum sum of pixels to consider a text line segmentation for extraction. 
-            If 'default', default values are applied.
+            If 'default', the default value (see function definition) is applied. Set to None for no filtering.
         median_bounds (tuple, optional): Bounds to filter text line segmentations based on size relative to the median. 
-            If 'default', default values are applied.
-
+            If 'default', default values (see function definition) are applied. Set to None for no filtering.
     Returns:
         Image: An image with overlay text, where text is extracted and recognized from the original image.
-
     This function handles:
     - Image binarization.
     - Text line segmentation.
@@ -91,8 +89,8 @@ description = """<ul>
                         </ol>
                     </li>
                     <li>Optimized for <b>English</b>; other languages (e.g., German) may require OCR model fine-tuning.</li>
-                    <li>Uses free CPU-based compute, which is rather <b>slow</b>. A pipeline run will take up to 10 minutes.</li> 
-                    <li>For lengthy waits, click on the pre-computed examples below or look at example results at: <a href='https://github.com/pluniak/ocrd/tree/main/data/demo_data'>https://github.com/pluniak/ocrd/tree/main/data/demo_data</a></li>
+                    <li>Uses free CPU-based compute, which is rather slow. Depending on the input image, a pipeline run can take over 10 minutes.</li> 
+                    <li>For lengthy waits, look at these <b>pre-computed examples</b>: <a href='https://github.com/pluniak/ocrd/tree/main/data/demo_data'>https://github.com/pluniak/ocrd/tree/main/data/demo_data</a></li>
                     <li>The demo is based on code from my GitHub repository: <a href='https://github.com/pluniak/ocrd'>https://github.com/pluniak/ocrd</a></li>
                     <li>Note: The demo is just a <b>first prototype</b>! OCR performance and computation speed should be optimized.</li>
                 </ul>"""

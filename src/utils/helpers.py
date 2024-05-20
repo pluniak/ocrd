@@ -289,7 +289,7 @@ class OCRD:
         return textline_segments
     
 
-    def extract_filter_and_deskew_textlines(self, img, textline_mask, min_pixel_sum=20, median_bounds=(.5, 20)):
+    def extract_filter_and_deskew_textlines(self, img, textline_mask, min_pixel_sum=30, median_bounds=(.5, 20)):
 
         """
         Extracts and deskews text lines from an image based on a provided textline mask. This function identifies
