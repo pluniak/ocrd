@@ -2,7 +2,6 @@
 
 ## Description
 This is a demo project for "Optical Character Recognition Digitization" of full text pages. It is designed for use as a Hugging Face Gradio app. 
-<img src="./data/app_interface.jpg" alt="Input Image" width="1000" style="margin: 10px;"/>
 
 The underlying processing pipeline includes:
   1. Image binarization
@@ -20,6 +19,9 @@ Please note:
 Usage:
   1. **Test the the demo** online at https://huggingface.co/spaces/pluniak/ocrd
   2. or follow the steps below to install and run the app on your local computer.
+
+Screenshot of the app user interface:
+<img src="./data/app_interface.jpg" alt="Input Image" width="1000" style="margin: 10px;"/>
 
 ## Installation
   1. Install Anaconda if you haven't done yet: https://docs.anaconda.com/free/anaconda/install
