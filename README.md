@@ -2,7 +2,7 @@
 
 ## Description
 This is a demo project for "Optical Character Recognition Digitization" of full text pages. It is designed for use as a Hugging Face Gradio app. 
-<img src="./data/app_interface.jpg" alt="Input Image" width="300" style="margin: 10px;"/>
+<img src="./data/app_interface.jpg" alt="Input Image" width="600" style="margin: 10px;"/>
 
 The underlying processing pipeline includes:
   1. Image binarization
