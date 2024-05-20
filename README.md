@@ -12,17 +12,17 @@ The underlying processing pipeline includes:
 
 Please note:
 - The app is optimized for **English**; other languages (e.g., German) may require OCR model fine-tuning.
-- When running on CPUs, a pipeline run can take up to 10 minutes.
-- For lengthy waits or if the online app is down, look at the pre-computed examples: [https://github.com/pluniak/ocrd/tree/main/data/demo_data](https://github.com/pluniak/ocrd/tree/main/data/demo_data)
+- When running on CPUs, a pipeline run can take over 10 minutes depending on the input image.
+- For lengthy waits or if the online app is down, look at the **pre-computed examples**: [https://github.com/pluniak/ocrd/tree/main/data/demo_data](https://github.com/pluniak/ocrd/tree/main/data/demo_data)
 - The demo is just a **first prototype**! OCR performance and computation speed should be optimized.
 
 Usage:
-  1. Try out the the demo online at https://huggingface.co/spaces/pluniak/ocrd
+  1. **Test the the demo** online at https://huggingface.co/spaces/pluniak/ocrd
   2. or follow the steps below to install and run the app on your local computer.
 
 ## Installation
   1. Install Anaconda if you haven't done yet: https://docs.anaconda.com/free/anaconda/install
-  2. From CLI clone this repository and set up and activate the virtual environment:
+  2. Clone the repository, then set up and activate the virtual environment:
 ```bash
 git clone https://github.com/pluniak/ocrd.git
 cd ocrd
@@ -38,11 +38,24 @@ Execute this script from CLI:
 ```bash
 python ./src/app.py
 ```
+Then click on the generated local URL (usually: http://127.0.0.1:7860).
 ### Jupyter Notebook
 Open and run this notebook:
 ```bash
 ./notebooks/app.ipynb
 ```
+
+## OCRD Pipeline Example
+
+### Input and Output Image Generated from Recognized Text
+
+<div style="display: flex; justify-content: center; align-items: center;">
+  <img src="./data/demo_data/act_image.jpg" alt="Input Image" width="300" style="margin: 10px;"/>
+  <img src="./data/demo_data/act_genImg.jpg" alt="Output Image" width="300" style="margin: 10px;"/>
+</div>
+
+For more examples visit: [https://github.com/pluniak/ocrd/tree/main/data/demo_data](https://github.com/pluniak/ocrd/tree/main/data/demo_data)
+
 
 ## Acknowledgements and Attributions
 
