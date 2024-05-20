@@ -13,7 +13,7 @@ The underlying processing pipeline includes:
 Please note:
 - The app is optimized for **English**; other languages (e.g., German) may require OCR model fine-tuning.
 - When running on CPUs, a pipeline run can take over 10 minutes depending on the input image.
-- For lengthy waits or if the online app is down, look at the pre-computed examples: [https://github.com/pluniak/ocrd/tree/main/data/demo_data](https://github.com/pluniak/ocrd/tree/main/data/demo_data)
+- For lengthy waits or if the online app is down, look at the **pre-computed examples**: [https://github.com/pluniak/ocrd/tree/main/data/demo_data](https://github.com/pluniak/ocrd/tree/main/data/demo_data)
 - The demo is just a **first prototype**! OCR performance and computation speed should be optimized.
 
 Usage:
