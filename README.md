@@ -38,6 +38,7 @@ Execute this script from CLI:
 ```bash
 python ./src/app.py
 ```
+Then click on the generated local URL (usually: http://127.0.0.1:7860).
 ### Jupyter Notebook
 Open and run this notebook:
 ```bash
