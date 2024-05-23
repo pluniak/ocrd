@@ -93,6 +93,7 @@ description = """<ul>
                     <li>For lengthy waits, look at these <b>pre-computed examples</b>: <a href='https://github.com/pluniak/ocrd/tree/main/data/demo_data'>https://github.com/pluniak/ocrd/tree/main/data/demo_data</a></li>
                     <li>The demo is based on code from my GitHub repository: <a href='https://github.com/pluniak/ocrd'>https://github.com/pluniak/ocrd</a></li>
                     <li>Note: The demo is just a <b>first prototype</b>! OCR performance and computation speed should be optimized.</li>
+                    <li>Please <b>keep this page untouched</b> during the pipeline run to prevent errors.</li>
                 </ul>"""
 
 iface = gr.Interface(fn = run_ocrd_pipeline,
