@@ -22,7 +22,7 @@ if env_exists; then
 else
     echo "Environment '$ENV_NAME' does not exist, creating..."
     # Create the environment with Python and install packages
-    conda create --name "$ENV_NAME" python=3.8 --yes
+    conda create --name "$ENV_NAME" python=3.10 --yes
     conda activate "$ENV_NAME"
     pip install -r "$REQUIREMENTS_FILE"
 fi

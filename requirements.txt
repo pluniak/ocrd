@@ -5,3 +5,4 @@ huggingface_hub==0.22.2
 transformers==4.40.1
 imageio==2.34.1
 gradio==4.31.1
+pytest==8.2.1

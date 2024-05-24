@@ -61,8 +61,14 @@ class OCRD:
             Visualizes the model's prediction by overlaying it onto the original image with distinct colors.
     """
     
-    def __init__(self, img_path):
-        self.image = np.array(Image.open(img_path))
+    def __init__(self, img_path=None, img=None):
+        """Initialize with either an image object or a file path."""
+        if img is not None:
+            self.image = np.array(img)
+        elif img_path is not None:
+            self.image = np.array(Image.open(img_path))
+        else:
+            raise ValueError("Either img or img_path must be provided")
 
     def scale_image(self, img):
         """
@@ -261,13 +267,20 @@ class OCRD:
             binarized = (binarized * 255).astype(np.uint8)
 
         elif binarize_mode == 'fast':
-            binarized = self.scale_image(img, self.image)
-            binarized = cv2.cvtColor(binarized, cv2.COLOR_BGR2GRAY)
+            binarized = self.scale_image(img)
+            # convert to gray-scale with no channel dim
+            if binarized.ndim == 2:
+                pass
+            elif binarized.shape[-1] == 1:
+                binarized = binarized[...,0]
+            else:
+                print('binarized.shape:', binarized.shape)
+                binarized = cv2.cvtColor(binarized, cv2.COLOR_BGR2GRAY)
             _, binarized = cv2.threshold(binarized, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
             binarized = np.repeat(binarized[:, :, np.newaxis], 3, axis=2)
 
         elif binarize_mode == 'no':
-            binarized = img.copy()
+            binarized = self.scale_image(img)
 
         else:
             accepted_values = ['detailed', 'fast', 'no']
@@ -279,9 +292,34 @@ class OCRD:
     
 
     def segment_textlines(self, img):
+        
         '''
-        ADD DOCUMENTATION!
+        Segments text lines from an input image using a pre-trained deep learning model.
+
+        Parameters:
+        - img (ndarray): The image from which text lines are to be segmented. It should be
+                        preprocessed as necessary for the model's input requirements.
+
+        Returns:
+        - ndarray: An image where text lines are segmented and marked, typically as a mask
+                where text lines are indicated and can be further processed or visualized.
+
+        Description:
+        The method utilizes a pre-trained model hosted on Hugging Face, specifically
+        designed for text line segmentation. It handles the loading and application of
+        the model to the input image, and returns a segmentation mask indicating the
+        locations of text lines within the image. This mask can then be used for further
+        processing such as text extraction and recognition.
+
+        Note:
+        - The model used ('SBB/eynollah-textline') is optimized for a specific type of document
+        image and may require fine-tuning or adaptation for different document types or
+        image qualities.
+        - This function assumes the presence of the `predict` method in the class, which
+        manages the application of deep learning models to images, including necessary
+        pre-processing like resizing.
         '''
+
         model_name = "SBB/eynollah-textline"
         model = from_pretrained_keras(model_name)
         textline_segments = self.predict(model, img)

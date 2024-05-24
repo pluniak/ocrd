@@ -105,5 +105,6 @@ iface = gr.Interface(fn = run_ocrd_pipeline,
                                      info='"adjusted" will try to mimic font sizes from the input image')
                      ],
                      outputs=gr.Image(label='Output image: overlay with recognized text', type='pil', format='jpeg'),
-                     examples=demo_data)
+                     examples=demo_data # using demo data will increase app start up time on Gradio spaces from 1 minute to 30 minutes, so comment out line if needed
+                     )
 iface.launch()
