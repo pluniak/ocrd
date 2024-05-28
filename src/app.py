@@ -1,4 +1,4 @@
-### Purpose of file: Putting app.ipynb into a script as needed for the Gradio app ### 
+### Purpose of file: Python script for running OCRD pipeline as a Gradio app ### 
 
 
 import gradio as gr
